@@ -22,6 +22,6 @@ Dependencies: .NET Core SDK, Discord.Net, DSharpPlus
    - After that Search for DSharpPlus, DSharpPlus.CommandsNext and DSharpPlus.Interactivity.
    - Install all 3 of these.
     
-    NOTE: DO NOT INSTALL VERSIONS FROM NuGet Packages! SOME FUNCTIONS WILL NOT WORK!
+ NOTE: DO NOT INSTALL ANY OF THE DSharpPlus VERSIONS FROM NuGet Packages! SOME FUNCTIONS WILL NOT WORK!
     
  Hopefull this would be able to work for you.
