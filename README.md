@@ -5,7 +5,7 @@ This is the Discord Bot we used for our Hypixel Store.
 Dependencies: .NET Core SDK, Discord.Net, DSharpPlus
 
 Installation Process:
-  1. You need to install .NET Core SDK from https://dotnet.microsoft.com/download
+  1. You need to install [.NET Core SDK] (https://dotnet.microsoft.com/download)
   
   2. Under Solution Explorer, Right click Dependencies then Manage NuGet Packages.
     - After that, make sure the Package sources is nuget.org (Package Source is located at the top right of the tab)
