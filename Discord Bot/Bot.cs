@@ -64,6 +64,5 @@ namespace Discord_Bot
         {
             return Task.CompletedTask;
         }
-
     }
 }

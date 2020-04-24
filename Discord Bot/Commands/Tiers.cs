@@ -1,4 +1,6 @@
 ﻿using Discord_Bot.Customer;
+using Discord_Bot.Messages;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -15,45 +17,61 @@ namespace Discord_Bot.Commands
     {
         public string parsedTest { get; set; }
 
-        [Command("tier")]
-        [Description(" Shows your Tiers! Ranging from 1 - 4")] // this will be displayed to tell users what this command does when they invoke help
-        [Aliases("tiers")]
-        public async Task customerTier(CommandContext ctx)
+        [Command("profile"), Aliases("viewprofile"), Description(" Displays your profile!")]
+        public async Task customerTier(CommandContext Context)
         {
-            var hello = new Data(ctx.Member.Id.ToString());
+            await Context.Message.DeleteAsync();
 
-            await ctx.Channel.SendMessageAsync("Your actual ID: " + ctx.User.Id.ToString() + "\n" +
-                                               "Your fake ID: " + hello.getID().ToString() + "\n" +
-                                               "Your tier: " + hello.getTier().ToString() + "\n" +
-                                               "Spendings: $" + hello.getSpendings().ToString());
-
+            ProfileSender.yourProfile(Context);
         }
 
+        [Command("profile"), Description(" Displays your profile!")]
+        public async Task customerTier2(CommandContext Context, DiscordUser requestedUser)
+        {
+            await Context.Message.DeleteAsync();
 
-        // /add @uwu 10
-        // <@236412553968877569>
-        //   236412553968877569 
-        // 2
-        // 0123456789
+            if (Context.Member.Id.ToString() == requestedUser.Id.ToString())
+            {
+                ProfileSender.yourProfile(Context);
+            }
+            else
+            {
+                ProfileSender.otherProfile(Context, requestedUser);
+            }
+        }
 
         [Command("add")]
-        public async Task addSpendings(CommandContext ctx, string whoTF, float amount)
+        [Hidden]
+        [RequireRoles(RoleCheckMode.Any, "Support Team")]
+        public async Task addSpendings(CommandContext Context, DiscordUser customerDiscord, float amountToAdd)
         {
-            //await ctx.Channel.SendMessageAsync(whoTF);
+            await Context.Message.DeleteAsync();
 
-            whoTF = removeUUIDChar(whoTF);
+            ProfileSender.otherProfile(Context, customerDiscord);
 
-            Console.WriteLine(whoTF);
+            ProfileSender.updatingProfile(Context, customerDiscord, amountToAdd, 1);
+        }
 
-            var hello2 = new Data(ctx.Member.Id.ToString());
+        [Command("remove")]
+        [Hidden]
+        [RequireRoles(RoleCheckMode.Any, "Support Team")]
+        public async Task removeSpendings(CommandContext Context, DiscordUser customerDiscord, float amountToAdd)
+        {
+            await Context.Message.DeleteAsync();
 
-            await ctx.Channel.SendMessageAsync("Test UUID: " + whoTF);
+            ProfileSender.otherProfile(Context, customerDiscord);
 
-            await ctx.Channel.SendMessageAsync("Adding this amount: $" + amount.ToString());
+            ProfileSender.updatingProfile(Context, customerDiscord, amountToAdd, 2);
+        }
 
-            hello2.addSpendings(whoTF, amount);
+        [Command("set")]
+        [Hidden]
+        [RequireRoles(RoleCheckMode.Any, "Support Team")]
+        public async Task setSpendings(CommandContext Context, DiscordUser customerDiscord, float amountToSet)
+        {
+            await Context.Message.DeleteAsync();
 
-            await ctx.Channel.SendMessageAsync("Your new spendings: $" + hello2.getSpendings());
+            ProfileSender.updatingProfile(Context, customerDiscord, amountToSet, 3);
         }
 
         public string removeUUIDChar(string unparsed) // Removes the "<@" and ">" from the string
@@ -61,12 +79,6 @@ namespace Discord_Bot.Commands
             string parsed = unparsed.Remove(0, 2);
             parsed = parsed.Remove(parsed.Length - 1, 1);
             return parsed;
-        }
-
-        [Command("uuid")]
-        public async Task uniqueID(CommandContext ctx)
-        {
-            await ctx.Channel.SendMessageAsync(ctx.Member.Id.ToString());
         }
     }
 }

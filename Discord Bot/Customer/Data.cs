@@ -6,106 +6,243 @@ using System.Text;
 
 namespace Discord_Bot.Customer
 {
-    public class Data
+    public sealed class Data
     {
+        private static Data instance = null;
+        private static readonly object padlock = new object();
+
         private string filePath = "Customer-Information.txt";
 
         private string customerID;
         private int customerTier;
         private float customerSpendings;
 
-        public Data(string sendersID) // Constructor
+        public List<string> customerInformation;
+
+        Data() // Constructor
         {
-            obtainData(sendersID);
+            if (!File.Exists(filePath))
+            {
+                Console.WriteLine(filePath + " not found. Generating a new .txt file");
+
+                File.Create(filePath).Close();
+            }
+            else
+            {
+                init();
+            }
         }
 
-        private void obtainData(string tf)
+        public static Data Instance
         {
-            List<string> lines = File.ReadAllLines(filePath).ToList();
-
-            foreach (var theLines in lines)
+            get
             {
-                string[] entries = theLines.Split(':');
-
-                customerID = entries[0];
-
-                customerTier = int.Parse(entries[1]);
-
-                customerSpendings = float.Parse(entries[2]); // Doesnt work for decimal.
-
-                if (customerID == tf)
+                lock (padlock)
                 {
-                    break;
+                    if (instance == null)
+                    {
+                        instance = new Data();
+                    }
+
+                    return instance;
                 }
             }
         }
 
+        ~Data() // Destructor does not get called at all dont bother adding code inside.
+        {
+            writeFile();
+        }
+
+        private void init()
+        {
+            customerInformation = File.ReadAllLines(filePath).ToList();
+        }
+
+        private void obtainData(string discordID)
+        {
+            int tmpCounter = 1;
+
+            int zeroTmp = 0;
+
+            bool skipCheck = false;
+
+            bool needWriteFile = false;
+
+            if (customerInformation.Count == 0) // If list is empty, instantly add the data into the list.
+            {
+                customerID = discordID;
+                customerTier = 0;
+                customerSpendings = 0;
+
+                skipCheck = true;
+
+                needWriteFile = true;
+            }
+
+            foreach (string line in customerInformation)
+            {
+                string[] arrLine = line.Split(":");
+
+                if (skipCheck == true)
+                {
+                    break;
+                }
+
+                if (discordID == arrLine[0])
+                {
+                    customerID = arrLine[0];
+                    customerTier = int.Parse(arrLine[1]);
+                    customerSpendings = float.Parse(arrLine[2]);
+
+                    break;
+                }
+
+                if (tmpCounter == customerInformation.Count) // Falls under here if there is no database for requested user.
+                {
+                    customerID = discordID;
+                    customerTier = 0;
+                    customerSpendings = 0;
+
+                    needWriteFile = true;
+
+                    break;
+                }
+
+                tmpCounter++;
+            }
+
+            if (needWriteFile == true)
+            {
+                string tmp = customerID + ":" + customerTier.ToString() + ":" + customerSpendings.ToString();
+
+                customerInformation.Add(tmp);
+
+                writeFile();
+            }
+        }
+
+        private void updateInformation(string discordID)
+        {
+            int tmpCounter = 0;
+
+            foreach (string line in customerInformation)
+            {
+                string[] arrLine = line.Split(":");
+
+                if (discordID == arrLine[0])
+                {
+                    break;
+                }
+
+                tmpCounter++;
+            }
+
+            if (tmpCounter != 0 && customerInformation.Count != 0)
+            {
+                customerInformation.RemoveAt(tmpCounter);
+            }
+
+            customerInformation.Insert(tmpCounter, customerID + ":" + customerTier.ToString() + ":" + customerSpendings.ToString());
+        }
+
         private void writeFile()
         {
-            int lte;
-
-            string newText;
-
-            string[] arrLine = File.ReadAllLines(filePath);
-
-            //arrLine[lte - 1] = newText;
-
-            File.WriteAllLines(filePath, arrLine);
+            foreach (string line in customerInformation)
+            {
+                File.WriteAllLines(filePath, customerInformation);
+            }
         }
 
-        ~Data() // Deconstructor
+        public int getTier(string discordID) // Rewrite code
         {
+            bool needToWriteFile = setTier(discordID);
 
-        }
+            if (needToWriteFile == true)
+            {
+                writeFile();
+            }
 
-        public string getID() // Retrieves Customer's unique Discord ID from whoever runs the command.
-        {
-            return customerID;
-        }
-
-        public int getTier() // Retrieves Customer's Tier from whoever runs the command.
-        {
             return customerTier;
         }
 
-        public void setTier()
+        private bool setTier(string discordID) // Checks and see if there's a need to update the customer's tier.
         {
-            double tempCustomerSpendings = getSpendings();
+            obtainData(discordID);
+
+            float tempCustomerSpendings = getSpendings(discordID);
+
+            int tempCustomerTier = 0;
 
             if (tempCustomerSpendings > 50.0f && tempCustomerSpendings <= 99.99f)
             {
-                customerTier = 1;
+                tempCustomerTier = 1;
             }
             else if (tempCustomerSpendings > 100.0f && tempCustomerSpendings <= 399.99f)
             {
-                customerTier = 2;
+                tempCustomerTier = 2;
             }
             else if (tempCustomerSpendings > 400.0f && tempCustomerSpendings <= 999.99f)
             {
-                customerTier = 3;
+                tempCustomerTier = 3;
             }
             else if (tempCustomerSpendings > 1000.0f)
             {
-                customerTier = 4;
+                tempCustomerTier = 4;
             }
             else
             {
-                customerTier = 0;
+                tempCustomerTier = 0;
             }
+
+            if (tempCustomerTier == customerTier)
+            {
+                return false; // If returns false that means there no need to update Customer's tier.
+            }
+            else
+            {
+                customerTier = tempCustomerTier;
+
+                return true; // If returns true that means there is a need to update Customer's Tier and rewrite file.
+            }
+        }
+
+        public float getSpendings(string discordID) // Retrieves Customer's Spendings from whoever runs the command
+        {
+            obtainData(discordID);
+
+            return customerSpendings;
+        }
+
+        public void addSpendings(string discordID, float amountToAdd)
+        {
+            obtainData(discordID);
+
+            customerSpendings += amountToAdd;
+
+            updateInformation(discordID);
 
             writeFile();
         }
 
-        public float getSpendings() // Retrieves Customer's Spendings from whoever runs the command
+        public void removeSpendings(string discordID, float amountToRemove)
         {
-            return customerSpendings;
+            obtainData(discordID);
+
+            customerSpendings -= amountToRemove;
+
+            updateInformation(discordID);
+
+            writeFile();
         }
 
-        public void addSpendings(string whoo, float amount)
+        public void setSpendings(string discordID, float amountToSet)
         {
-            obtainData(whoo);
+            obtainData(discordID);
 
-            customerSpendings += amount;
+            customerSpendings = amountToSet;
+
+            updateInformation(discordID);
 
             writeFile();
         }
