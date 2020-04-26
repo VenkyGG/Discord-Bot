@@ -15,8 +15,6 @@ namespace Discord_Bot.Commands
 {
     public class Tiers : BaseCommandModule
     {
-        public string parsedTest { get; set; }
-
         [Command("profile"), Aliases("viewprofile"), Description(" Displays your profile!")]
         public async Task customerTier(CommandContext Context)
         {
@@ -47,7 +45,7 @@ namespace Discord_Bot.Commands
         {
             await Context.Message.DeleteAsync();
 
-            ProfileSender.otherProfile(Context, customerDiscord);
+            //ProfileSender.otherProfile(Context, customerDiscord);
 
             ProfileSender.updatingProfile(Context, customerDiscord, amountToAdd, 1);
         }
@@ -59,7 +57,7 @@ namespace Discord_Bot.Commands
         {
             await Context.Message.DeleteAsync();
 
-            ProfileSender.otherProfile(Context, customerDiscord);
+            //ProfileSender.otherProfile(Context, customerDiscord);
 
             ProfileSender.updatingProfile(Context, customerDiscord, amountToAdd, 2);
         }
@@ -72,13 +70,6 @@ namespace Discord_Bot.Commands
             await Context.Message.DeleteAsync();
 
             ProfileSender.updatingProfile(Context, customerDiscord, amountToSet, 3);
-        }
-
-        public string removeUUIDChar(string unparsed) // Removes the "<@" and ">" from the string
-        {
-            string parsed = unparsed.Remove(0, 2);
-            parsed = parsed.Remove(parsed.Length - 1, 1);
-            return parsed;
         }
     }
 }

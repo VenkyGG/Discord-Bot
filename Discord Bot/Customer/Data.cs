@@ -138,12 +138,14 @@ namespace Discord_Bot.Customer
                 tmpCounter++;
             }
 
-            if (tmpCounter != 0 && customerInformation.Count != 0)
+            if (customerInformation.Count != 0)
             {
                 customerInformation.RemoveAt(tmpCounter);
             }
 
             customerInformation.Insert(tmpCounter, customerID + ":" + customerTier.ToString() + ":" + customerSpendings.ToString());
+
+            writeFile();
         }
 
         private void writeFile()
@@ -160,7 +162,7 @@ namespace Discord_Bot.Customer
 
             if (needToWriteFile == true)
             {
-                writeFile();
+                updateInformation(discordID);
             }
 
             return customerTier;
@@ -174,19 +176,19 @@ namespace Discord_Bot.Customer
 
             int tempCustomerTier = 0;
 
-            if (tempCustomerSpendings > 50.0f && tempCustomerSpendings <= 99.99f)
+            if (tempCustomerSpendings >= 50.0f && tempCustomerSpendings < 100.0f)
             {
                 tempCustomerTier = 1;
             }
-            else if (tempCustomerSpendings > 100.0f && tempCustomerSpendings <= 399.99f)
+            else if (tempCustomerSpendings >= 100.0f && tempCustomerSpendings < 400.0f)
             {
                 tempCustomerTier = 2;
             }
-            else if (tempCustomerSpendings > 400.0f && tempCustomerSpendings <= 999.99f)
+            else if (tempCustomerSpendings >= 400.0f && tempCustomerSpendings < 1000.0f)
             {
                 tempCustomerTier = 3;
             }
-            else if (tempCustomerSpendings > 1000.0f)
+            else if (tempCustomerSpendings >= 1000.0f)
             {
                 tempCustomerTier = 4;
             }
@@ -221,8 +223,6 @@ namespace Discord_Bot.Customer
             customerSpendings += amountToAdd;
 
             updateInformation(discordID);
-
-            writeFile();
         }
 
         public void removeSpendings(string discordID, float amountToRemove)
@@ -232,8 +232,6 @@ namespace Discord_Bot.Customer
             customerSpendings -= amountToRemove;
 
             updateInformation(discordID);
-
-            writeFile();
         }
 
         public void setSpendings(string discordID, float amountToSet)
@@ -243,8 +241,6 @@ namespace Discord_Bot.Customer
             customerSpendings = amountToSet;
 
             updateInformation(discordID);
-
-            writeFile();
         }
     }
 }
