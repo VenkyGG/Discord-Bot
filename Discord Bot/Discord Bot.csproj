@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="bin\Debug\netcoreapp3.1\config.json" />
+    <None Remove="config.json" />
+    <None Remove="Customer-Information.txt" />
   </ItemGroup>
 
   <ItemGroup>
@@ -15,6 +16,10 @@
     <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00670" />
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00670" />
     <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00670" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="bin\Debug\netcoreapp3.1\" />
   </ItemGroup>
 
 </Project>
